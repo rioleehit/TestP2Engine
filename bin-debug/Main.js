@@ -43,6 +43,60 @@ var Main = (function (_super) {
     __extends(Main, _super);
     function Main() {
         var _this = _super.call(this) || this;
+        /**
+         * 创建游戏场景
+         * Create a game scene
+         */
+        // private createGameScene():void {
+        //     let sky:egret.Bitmap = this.createBitmapByName("bg_jpg");
+        //     //this.addChild(sky);
+        //     let stageW:number = this.stage.stageWidth;
+        //     let stageH:number = this.stage.stageHeight;
+        //     sky.width = stageW;
+        //     sky.height = stageH;
+        //     let topMask = new egret.Shape();
+        //     topMask.graphics.beginFill(0x000000, 0.5);
+        //     topMask.graphics.drawRect(0, 0, stageW, 172);
+        //     topMask.graphics.endFill();
+        //     topMask.y = 33;
+        //     //this.addChild(topMask);
+        //     let icon:egret.Bitmap = this.createBitmapByName("egret_icon_png");
+        //     //this.addChild(icon);
+        //     icon.x = 26;
+        //     icon.y = 33;
+        //     let line = new egret.Shape();
+        //     line.graphics.lineStyle(2,0xffffff);
+        //     line.graphics.moveTo(0,0);
+        //     line.graphics.lineTo(0,117);
+        //     line.graphics.endFill();
+        //     line.x = 172;
+        //     line.y = 61;
+        //     //this.addChild(line);
+        //     let colorLabel = new egret.TextField();
+        //     colorLabel.textColor = 0xffffff;
+        //     colorLabel.width = stageW - 172;
+        //     colorLabel.textAlign = "center";
+        //     colorLabel.text = "Hello Egret";
+        //     colorLabel.size = 24;
+        //     colorLabel.x = 172;
+        //     colorLabel.y = 80;
+        //     //this.addChild(colorLabel);
+        //     let textfield = new egret.TextField();
+        //     //this.addChild(textfield);
+        //     textfield.alpha = 0;
+        //     textfield.width = stageW - 172;
+        //     textfield.textAlign = egret.HorizontalAlign.CENTER;
+        //     textfield.size = 24;
+        //     textfield.textColor = 0xffffff;
+        //     textfield.x = 172;
+        //     textfield.y = 135;
+        //     this.textfield = textfield;
+        //     //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
+        //     // Get asynchronously a json configuration file according to name keyword. As for the property of name please refer to the configuration file of resources/resource.json.
+        //     //RES.getResAsync("description_json", this.startAnimation, this)
+        // }
+        //debug模式，使用图形绘制
+        _this.isDebug = true;
         _this.addEventListener(egret.Event.ADDED_TO_STAGE, _this.onAddToStage, _this);
         return _this;
     }
@@ -111,55 +165,118 @@ var Main = (function (_super) {
     };
     /**
      * 创建游戏场景
-     * Create a game scene
      */
     Main.prototype.createGameScene = function () {
-        var sky = this.createBitmapByName("bg_jpg");
-        this.addChild(sky);
-        var stageW = this.stage.stageWidth;
-        var stageH = this.stage.stageHeight;
-        sky.width = stageW;
-        sky.height = stageH;
-        var topMask = new egret.Shape();
-        topMask.graphics.beginFill(0x000000, 0.5);
-        topMask.graphics.drawRect(0, 0, stageW, 172);
-        topMask.graphics.endFill();
-        topMask.y = 33;
-        this.addChild(topMask);
-        var icon = this.createBitmapByName("egret_icon_png");
-        this.addChild(icon);
-        icon.x = 26;
-        icon.y = 33;
-        var line = new egret.Shape();
-        line.graphics.lineStyle(2, 0xffffff);
-        line.graphics.moveTo(0, 0);
-        line.graphics.lineTo(0, 117);
-        line.graphics.endFill();
-        line.x = 172;
-        line.y = 61;
-        this.addChild(line);
-        var colorLabel = new egret.TextField();
-        colorLabel.textColor = 0xffffff;
-        colorLabel.width = stageW - 172;
-        colorLabel.textAlign = "center";
-        colorLabel.text = "Hello Egret";
-        colorLabel.size = 24;
-        colorLabel.x = 172;
-        colorLabel.y = 80;
-        this.addChild(colorLabel);
-        var textfield = new egret.TextField();
-        this.addChild(textfield);
-        textfield.alpha = 0;
-        textfield.width = stageW - 172;
-        textfield.textAlign = egret.HorizontalAlign.CENTER;
-        textfield.size = 24;
-        textfield.textColor = 0xffffff;
-        textfield.x = 172;
-        textfield.y = 135;
-        this.textfield = textfield;
-        //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
-        // Get asynchronously a json configuration file according to name keyword. As for the property of name please refer to the configuration file of resources/resource.json.
-        RES.getResAsync("description_json", this.startAnimation, this);
+        //egret.Profiler.getInstance().run();
+        var factor = 50;
+        //创建world
+        var world = new p2.World();
+        world.sleepMode = p2.World.BODY_SLEEPING;
+        //创建plane
+        var planeShape = new p2.Plane();
+        var planeBody = new p2.Body();
+        planeBody.addShape(planeShape);
+        planeBody.displays = [];
+        world.addBody(planeBody);
+        egret.Ticker.getInstance().register(function (dt) {
+            if (dt < 10) {
+                return;
+            }
+            if (dt > 1000) {
+                return;
+            }
+            world.step(dt / 1000);
+            var stageHeight = egret.MainContext.instance.stage.stageHeight;
+            var l = world.bodies.length;
+            for (var i = 0; i < l; i++) {
+                var boxBody = world.bodies[i];
+                var box = boxBody.displays[0];
+                if (box) {
+                    box.x = boxBody.position[0] * factor;
+                    box.y = stageHeight - boxBody.position[1] * factor;
+                    box.rotation = 360 - (boxBody.angle + boxBody.shapes[0].angle) * 180 / Math.PI;
+                    if (boxBody.sleepState == p2.Body.SLEEPING) {
+                        box.alpha = 0.5;
+                    }
+                    else {
+                        box.alpha = 1;
+                    }
+                }
+            }
+        }, this);
+        //鼠标点击添加刚体
+        this.stage.addEventListener(egret.TouchEvent.TOUCH_BEGIN, addOneBox, this);
+        var self = this;
+        function addOneBox(e) {
+            var positionX = Math.floor(e.stageX / factor);
+            var positionY = Math.floor((egret.MainContext.instance.stage.stageHeight - e.stageY) / factor);
+            var display;
+            if (Math.random() > 0.5) {
+                //添加方形刚体
+                //var boxShape: p2.Shape = new p2.Rectangle(2, 1);
+                var boxShape = new p2.Box({ width: 2, height: 1 });
+                var boxBody = new p2.Body({ mass: 1, position: [positionX, positionY], angularVelocity: 1 });
+                boxBody.addShape(boxShape);
+                world.addBody(boxBody);
+                if (self.isDebug) {
+                    display = self.createBox(boxShape.width * factor, boxShape.height * factor);
+                }
+                else {
+                    display = self.createBitmapByName("rect");
+                }
+                display.width = boxShape.width * factor;
+                display.height = boxShape.height * factor;
+            }
+            else {
+                //添加圆形刚体
+                //var boxShape: p2.Shape = new p2.Circle(1);
+                var boxShape = new p2.Circle({ radius: 1 });
+                var boxBody = new p2.Body({ mass: 1, position: [positionX, positionY] });
+                boxBody.addShape(boxShape);
+                world.addBody(boxBody);
+                if (self.isDebug) {
+                    display = self.createBall(boxShape.radius * factor);
+                }
+                else {
+                    display = self.createBitmapByName("circle");
+                }
+                display.width = boxShape.radius * 2 * factor;
+                display.height = boxShape.radius * 2 * factor;
+            }
+            display.anchorOffsetX = display.width / 2;
+            display.anchorOffsetY = display.height / 2;
+            boxBody.displays = [display];
+            self.addChild(display);
+        }
+    };
+    /**
+     * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
+     */
+    // private createBitmapByName(name: string): egret.Bitmap {
+    //     var result: egret.Bitmap = new egret.Bitmap();
+    //     var texture: egret.Texture = RES.getRes(name);
+    //     result.texture = texture;
+    //     return result;
+    // }
+    /**
+     * 创建一个圆形
+     */
+    Main.prototype.createBall = function (r) {
+        var shape = new egret.Shape();
+        shape.graphics.beginFill(0xfff000);
+        shape.graphics.drawCircle(r, r, r);
+        shape.graphics.endFill();
+        return shape;
+    };
+    /**
+     * 创建一个方形
+     */
+    Main.prototype.createBox = function (width, height) {
+        var shape = new egret.Shape();
+        shape.graphics.beginFill(0xfff000);
+        shape.graphics.drawRect(0, 0, width, height);
+        shape.graphics.endFill();
+        return shape;
     };
     /**
      * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
