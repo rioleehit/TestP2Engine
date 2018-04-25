@@ -1,38 +1,42 @@
 {
-  "native": {
-    "path_ignore": []
-  },
-  "publish": {
-    "web": 0,
-    "native": 1,
-    "path": "bin-release"
-  },
-  "egret_version": "3.2.2",
-  "modules": [
-    {
-      "name": "egret"
-    },
-    {
-      "name": "game"
-    },
-    {
-      "name": "res"
-    },
-    {
-      "name": "tween"
-    },
-    {
-      "name": "socket"
-    },
-    {
-      "name": "dragonBones"
-    },
-    {
-      "name": "egret3d"
-    },
-    {
-      "path":"../libs/physics/libsrc/",
-      "name":"physics"
-    }
-  ]
+	"native": {
+		"path_ignore": []
+	},
+	"publish": {
+		"web": 0,
+		"native": 1,
+		"path": "bin-release"
+	},
+	"egret_version": "5.0.14",
+	"modules": [
+		{
+			"name": "egret"
+		},
+		{
+			"name": "game"
+		},
+		{
+			"name": "res"
+		},
+		{
+			"name": "tween"
+		},
+		{
+			"name": "socket"
+		},
+		{
+			"name": "dragonBones"
+		},
+		{
+			"name": "egret3d"
+		},
+		{
+			"path": "../egret-game-library/physics/libsrc/",
+			"name": "physics"
+		},
+		{
+			"name": "promise",
+			"path": "./promise"
+		}
+	]
 }
